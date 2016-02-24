@@ -91,7 +91,7 @@ ScreenshotReporter.prototype.reportSpecResults =
         });
       });
 
-    var linkToScreenshot = 'http://ci.dev.wix/agent/downloadLogs.html?agentName=' + agentName + '&logName=' + logName
+    var linkToScreenshot = 'http://qatc.dev.wix/agent/downloadLogs.html?agentName=' + agentName + '&logName=' + logName
       + '/AutomationLogs/ScreenShots/'+ screenshotName +'&forceInline=true'.replace(" ", "_");
 
     console.log(' ##teamcity[buildProblem description=\'Test' + spec  + 'failed, Screenshot link:' + linkToScreenshot + '\'');
