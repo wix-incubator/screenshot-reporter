@@ -4,10 +4,14 @@ var fs = require('fs'),
   path = require('path'),
   mkdirp = require('mkdirp');
 
-var confName = process.env.TEAMCITY_BUILDCONF_NAME,
-  buildNumber = process.env.BUILD_NUMBER,
-  agentName = process.env.HOSTNAME,
+var confName = process.env.TEAMCITY_BUILDCONF_NAME || '',
+  buildNumber = process.env.BUILD_NUMBER || '',
+  agentName = process.env.HOSTNAME || '',
   logName = confName + '_BuildNum_' + buildNumber;
+
+var isLocal = function () {
+  return process.env.agentType === 'ci';
+};
 
 /** Function: storeScreenShot
  * Stores base64 encoded PNG data to the file at the given path.
@@ -30,7 +34,7 @@ function storeScreenShot(data, file) {
  *     (String) containing the built path
  */
 function defaultPathBuilder() {
-  return "/home/builduser/" + agentName + "/logs/" + logName + "/AutomationLogs";
+  return isLocal ? "/test/e2e/screenshots" : "/home/builduser/" + agentName + "/logs/" + logName + "/AutomationLogs";
 }
 
 /** Class: ScreenshotReporter
