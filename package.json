@@ -1,0 +1,29 @@
+{
+  "name": "screenshot-reporter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": ":",
+    "release": "wnpm-release --no-shrinkwrap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wix/screenshot-reporter.git"
+  },
+  "author": "Anna Tsibulskaya <anna@wix.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wix/screenshot-reporter/issues"
+  },
+  "homepage": "https://github.com/wix/screenshot-reporter#readme",
+  "dependencies": {
+    "mkdirp": "~0.3.5"
+  },
+  "devDependencies": {
+    "wnpm-ci": "*"
+  }
+}
