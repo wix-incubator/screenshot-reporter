@@ -4,9 +4,9 @@ var fs = require('fs'),
   path = require('path'),
   mkdirp = require('mkdirp');
 
-var confName = process.env.TEAMCITY_BUILDCONF_NAME || '',
+var confName = process.env.TEAMCITY_BUILDCONF_NAME.replace(' ', '_') || '',
   buildNumber = process.env.BUILD_NUMBER || '',
-  agentName = process.env.HOSTNAME || '',
+  agentName = 'agent' + process.env.agentID || '',
   logName = confName + '_BuildNum_' + buildNumber;
 
 var isLocal = function () {
@@ -39,19 +39,6 @@ function defaultPathBuilder() {
 
 /** Class: ScreenshotReporter
  * Creates a new screenshot reporter using the given `options` object.
- *
- * For more information, please look at the README.md file.
- *
- * Parameters:
- *     (Object) options - Object with options as described below.
- *
- * Possible options:
- *     (String) baseDirectory - The path to the directory where screenshots are
- *                              stored. If not existing, it gets created.
- *                              Mandatory.
- *     (Boolean) takeScreenShotsForSkippedSpecs - Do you want to capture a
- *                                                screenshot for a skipped spec?
- *                                                Optional (default: false).
  */
 function ScreenshotReporter() {
   this.baseDirectory = defaultPathBuilder();
@@ -59,7 +46,7 @@ function ScreenshotReporter() {
 }
 
 /** Function: reportSpecResults
- * Called by Jasmine when reporteing results for a test spec. It triggers the
+ * Called by Jasmine when reporting results for a test spec. It triggers the
  * whole screenshot capture process and stores any relevant information.
  *
  * Parameters:
@@ -92,9 +79,9 @@ ScreenshotReporter.prototype.reportSpecResults =
       });
 
     var linkToScreenshot = 'http://qatc.dev.wix/agent/downloadLogs.html?agentName=' + agentName + '&logName=' + logName
-      + '/AutomationLogs/ScreenShots/'+ screenshotName +'&forceInline=true'.replace(" ", "_");
+      + '/AutomationLogs/ScreenShots/'+ screenshotName +'&forceInline=true';
 
-    console.log(' ##teamcity[buildProblem description=\'Test' + spec  + 'failed, Screenshot link:' + linkToScreenshot + '\'');
+    jasmine.getGlobal().console.log('##teamcity[buildProblem description=\'Test' + spec  + 'failed, Screenshot link:' + linkToScreenshot + '\']');
 
     return screenShotPath;
   };
