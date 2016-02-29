@@ -63,7 +63,7 @@ ScreenshotReporter.prototype.reportSpecResults =
       return;
     }
 
-    browser.takeScreenshot().then(function () {
+    browser.takeScreenshot().then(function (png) {
         var baseName = screenshotName,
           screenShotFile = baseName + '.png',
           screenShotPath = path.join(self.baseDirectory, screenShotFile),
