@@ -16,29 +16,38 @@ function storeScreenShot(data, file) {
   stream.end();
 }
 
+function camelize(str) {
+  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
+    if (+match === 0) return '';
+    return index == 0 ? match.toLowerCase() : match.toUpperCase();
+  });
+}
+
 class ScreenshotReporter {
   constructor() {
     this.baseDirectory = process.env.IS_BUILD_AGENT ? `/home/builduser/${agentName}/logs/${logName}/AutomationLogs` : 'test/e2e/screenshots';
   }
 
   specDone(spec) {
-    var screenshotName = spec.description + '.' + Date.now() + '.png';
+    var screenshotName = camelize(spec.description.toString()) + '.png';
     if(spec.status !== 'failed') {
       return;
     }
 
     browser.takeScreenshot().then(png => {
       mkdirp(this.baseDirectory, err => {
-      if(err) {
-        throw new Error('Could not create directory ' + this.baseDirectory);
-      } else {
-        storeScreenShot(png, path.join(this.baseDirectory, screenshotName));
-      }
+        if(err) {
+          throw new Error('Could not create directory ' + this.baseDirectory);
+        } else {
+          storeScreenShot(png, path.join(this.baseDirectory, screenshotName));
+        }
+      });
     });
-  });
 
-    var linkToScreenshot = `/agent/downloadLogs.html?agentName=${agentName}&logName=${logName}/AutomationLogs/ScreenShots/${screenshotName}&forceInline=true`;
-    jasmine.getGlobal().console.log('##teamcity[buildProblem description=\'Test' + spec  + 'failed, Screenshot link:' + linkToScreenshot + '\']');
+    var linkToScreenshot = process.env.IS_BUILD_AGENT ?
+      `/agent/downloadLogs.html?agentName=${agentName}&logName=${logName}/AutomationLogs/ScreenShots/${screenshotName}&forceInline=true`
+      : `${this.baseDirectory}/${screenshotName}`;
+    jasmine.getGlobal().console.log('##teamcity[buildProblem description=\'Test:\"' + spec.description  + '\" failed, Screenshot link:' + linkToScreenshot + '\']');
   }
 }
 
