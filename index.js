@@ -5,9 +5,9 @@ var fs = require('fs'),
   path = require('path'),
   mkdirp = require('mkdirp');
 
-var confName = (process.env.TEAMCITY_BUILDCONF_NAME || '').replace(' ', '_'),
-  buildNumber = process.env.BUILD_NUMBER || '',
-  agentName = `agent${process.env.agentID}`,
+var confName = (process.env.TEAMCITY_BUILDCONF_NAME || '').replace(/ /g, '_'),
+  buildNumber = (process.env.BUILD_NUMBER || '').split('#').pop(),
+  agentName = process.env.HOSTNAME.replace('-', '/'),
   logName = `${confName}_BuildNum_${buildNumber}`;
 
 function storeScreenShot(data, file) {
@@ -45,7 +45,7 @@ class ScreenshotReporter {
     });
 
     var linkToScreenshot = process.env.IS_BUILD_AGENT ?
-      `/agent/downloadLogs.html?agentName=${agentName}&logName=${logName}/AutomationLogs/ScreenShots/${screenshotName}&forceInline=true`
+      `http://ci.dev.wix/agent/downloadLogs.html?agentName=${agentName}&logName=${logName}/AutomationLogs/ScreenShots/${screenshotName}&forceInline=true`
       : `${this.baseDirectory}/${screenshotName}`;
     jasmine.getGlobal().console.log('##teamcity[buildProblem description=\'Test:\"' + spec.description  + '\" failed, Screenshot link:' + linkToScreenshot + '\']');
   }
