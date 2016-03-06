@@ -8,6 +8,7 @@ var fs = require('fs'),
 var confName = (process.env.TEAMCITY_BUILDCONF_NAME || '').replace(/ /g, '_'),
   buildNumber = (process.env.BUILD_NUMBER || '').split('#').pop(),
   agentName = process.env.HOSTNAME.replace('-', '/'),
+  agentId = `agent${process.env.agentID}`,
   logName = `${confName}_BuildNum_${buildNumber}`;
 
 function storeScreenShot(data, file) {
@@ -25,7 +26,7 @@ function camelize(str) {
 
 class ScreenshotReporter {
   constructor() {
-    this.baseDirectory = process.env.IS_BUILD_AGENT ? `/home/builduser/${agentName}/logs/${logName}/AutomationLogs` : 'test/e2e/screenshots';
+    this.baseDirectory = process.env.IS_BUILD_AGENT ? `/home/builduser/${agentId}/logs/${logName}/AutomationLogs` : 'test/e2e/screenshots';
   }
 
   specDone(spec) {
