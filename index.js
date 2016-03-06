@@ -47,7 +47,7 @@ class ScreenshotReporter {
 
     var linkToScreenshot = process.env.IS_BUILD_AGENT ?
       `http://ci.dev.wix/agent/downloadLogs.html?agentName=${agentName}&logName=${logName}/AutomationLogs/${screenshotName}&forceInline=true`
-      : `${this.baseDirectory}/${screenshotName}`;
+      : `file://${process.сwd()}/${this.baseDirectory}/${screenshotName}`;
     jasmine.getGlobal().console.log('##teamcity[buildProblem description=\'Test:\"' + spec.description  + '\" failed, Screenshot link:' + linkToScreenshot + '\']');
   }
 }
