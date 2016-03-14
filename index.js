@@ -11,10 +11,18 @@ var confName = (process.env.TEAMCITY_BUILDCONF_NAME || '').replace(/ /g, '_'),
   agentId = `agent${process.env.agentID}`,
   logName = `${confName}_BuildNum_${buildNumber}`;
 
-function storeScreenShot(data, file) {
+function storeFile(data, file, encoding) {
   var stream = fs.createWriteStream(file);
-  stream.write(new Buffer(data, 'base64'));
+  stream.write(new Buffer(data, encoding));
   stream.end();
+}
+
+function storeScreenShot(data, file) {
+  storeFile(data, file, 'base64');
+}
+
+function storeRawHtml(data, file) {
+  storeFile(data, file, 'utf-8');
 }
 
 function camelize(str) {
@@ -30,7 +38,9 @@ class ScreenshotReporter {
   }
 
   specDone(spec) {
-    var screenshotName = camelize(spec.description.toString()) + '.png';
+    var specName = camelize(spec.description.toString());
+    var screenshotName = specName + '.png';
+    var htmlSnapshotName = specName + '.html';
     if(spec.status !== 'failed') {
       return;
     }
@@ -45,11 +55,32 @@ class ScreenshotReporter {
       });
     });
 
-    var linkToScreenshot = process.env.IS_BUILD_AGENT ?
-      `http://ci.dev.wix/agent/downloadLogs.html?agentName=${agentName}&logName=${logName}/AutomationLogs/${screenshotName}&forceInline=true`
-      : `file://${process.cwd()}/${this.baseDirectory}/${screenshotName}`;
-    jasmine.getGlobal().console.log('##teamcity[buildProblem description=\'Test ' + spec.description  + ' failed, Screenshot link: ' + linkToScreenshot + ' \']');
+    browser.getPageSource().then(html => {
+      storeRawHtml(html, path.join(this.baseDirectory, htmlSnapshotName));
+    });
+
+    function toFileRemoteLink(fileName) {
+      return `http://ci.dev.wix/agent/downloadLogs.html?agentName=${agentName}&logName=${logName}/AutomationLogs/${fileName}&forceInline=true`;
+    }
+
+    function toFileLocalLink(fileName) {
+      return `file://${process.cwd()}/${this.baseDirectory}/${fileName}`;
+    }
+
+    var linkToScreenshot, linkToHtml;
+    if (process.env.IS_BUILD_AGENT) {
+      linkToScreenshot = toFileRemoteLink(screenshotName);
+      linkToHtml = toFileRemoteLink(htmlSnapshotName);
+    } else {
+      linkToScreenshot = toFileLocalLink.call(this, screenshotName);
+      linkToHtml = toFileLocalLink.call(this, htmlSnapshotName);
+    }
+
+    jasmine.getGlobal().console.log('##teamcity[buildProblem description=\'Test ' + spec.description  + ' failed, ' +
+      'Screenshot link: ' + linkToScreenshot + ' \', ' +
+      'Html link: ' + linkToHtml + ' \']');
   }
+
 }
 
 
